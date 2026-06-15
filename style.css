@@ -1667,3 +1667,244 @@ h1 {
 .wms-estado.error { color: #b91c1c; }
 .wms-estado.ok { color: #047857; }
 .mapa-popup .icono-tramite-popup { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; font-weight: 800; color: #0f172a; }
+
+
+/* V27: marcadores reales, leyenda del mapa y leyendas WMS */
+.tramite-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.tramite-marker {
+  transform: none !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  line-height: 1;
+  background: rgba(255,255,255,.98);
+  border: 3px solid var(--marker-color, #1769b4);
+  box-shadow: 0 8px 18px rgba(15,23,42,.24);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.tramite-marker:hover {
+  transform: scale(1.16) !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,.32);
+}
+
+.tramite-marker.activo { --marker-color: var(--cyan-vivo, #06b6d4); }
+.tramite-marker.despachado { --marker-color: var(--magenta-vivo, #d946ef); }
+.tramite-marker.sin-estado { --marker-color: #8b5cf6; }
+
+.tramite-emoji {
+  display: inline-block;
+  transform: translateY(-1px);
+}
+
+.map-overlay-leyenda {
+  right: 16px;
+  bottom: 16px;
+  width: 280px;
+  z-index: 460;
+}
+
+.leyenda-mapa-card {
+  padding: 12px;
+  background: rgba(255,255,255,.94);
+  max-height: 390px;
+  overflow: auto;
+}
+
+.leyenda-mapa-card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.leyenda-seccion {
+  border-top: 1px solid #e6edf5;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.leyenda-seccion:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.leyenda-titulo {
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .25px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.leyenda-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.leyenda-punto {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+.leyenda-punto.activo { background: var(--cyan-vivo, #06b6d4); }
+.leyenda-punto.despachado { background: var(--magenta-vivo, #d946ef); }
+
+.leyenda-iconos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+}
+
+.leyenda-icono-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.8px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.leyenda-icono-burbuja {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  flex: 0 0 auto;
+}
+
+.leyenda-wms-item {
+  border: 1px solid #e6edf5;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 7px;
+  margin-bottom: 7px;
+}
+
+.leyenda-wms-item strong {
+  display: block;
+  font-size: 11px;
+  color: #0f172a;
+  margin-bottom: 5px;
+  word-break: break-word;
+}
+
+.leyenda-wms-item img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.leyenda-wms-vacia {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.wms-panel-dashboard {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e6edf5;
+  display: grid;
+  gap: 7px;
+}
+
+.wms-panel-titulo {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .25px;
+}
+
+.wms-panel-dashboard select,
+.wms-panel-dashboard input {
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--borde);
+  padding: 0 9px;
+  font-size: 11.5px;
+  background: white;
+}
+
+.wms-botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.btn-secundario-mini {
+  height: 31px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-secundario-mini:hover { background: #dbeafe; }
+
+.btn-secundario-mini.claro {
+  border-color: #e2e8f0;
+  color: #475569;
+  background: #f8fafc;
+}
+
+.wms-estado {
+  min-height: 14px;
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.wms-estado.error { color: #b91c1c; }
+.wms-estado.ok { color: #047857; }
+
+.mapa-popup .icono-tramite-popup {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+@media (max-width: 1280px) {
+  .map-overlay-leyenda {
+    width: 250px;
+    right: 14px;
+    bottom: 14px;
+  }
+}
+
+@media (max-width: 860px) {
+  .map-overlay-leyenda {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: 12px;
+  }
+}

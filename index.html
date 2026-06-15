@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard PHDU V26</title>
+  <title>Dashboard PHDU V27</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -104,6 +104,25 @@
                   <button id="btnLimpiarWmsDashboard" type="button" class="btn-secundario-mini claro">Quitar capas</button>
                 </div>
                 <div id="estadoWmsDashboard" class="wms-estado"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="mapaLeyendaDashboard" class="map-overlay map-overlay-leyenda">
+            <div class="overlay-card leyenda-mapa-card">
+              <h3>Leyenda</h3>
+              <div class="leyenda-seccion">
+                <div class="leyenda-titulo">Estado del trámite</div>
+                <div class="leyenda-fila"><span class="leyenda-punto activo"></span><span>Activo</span></div>
+                <div class="leyenda-fila"><span class="leyenda-punto despachado"></span><span>Despachado</span></div>
+              </div>
+              <div class="leyenda-seccion">
+                <div class="leyenda-titulo">Íconos frecuentes</div>
+                <div id="leyendaIconosTramite" class="leyenda-iconos"></div>
+              </div>
+              <div class="leyenda-seccion">
+                <div class="leyenda-titulo">Capas WMS activas</div>
+                <div id="leyendaWmsDashboard" class="leyenda-wms">Sin capas territoriales activas.</div>
               </div>
             </div>
           </div>

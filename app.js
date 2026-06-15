@@ -27,6 +27,9 @@
   var mapaDashboardListo = false;
   var controlCapasWmsDashboard = null;
   var capasWmsDashboard = {};
+  var nombresCapasWmsDashboard = {};
+  var controlCapasWmsDashboard = null;
+  var capasWmsDashboard = {};
 
   function elemento(id) {
     return document.getElementById(id);
@@ -1454,6 +1457,8 @@ function actualizarDashboardBusqueda() {
     }).addTo(mapaDashboard);
 
     capaMarcadoresDashboard = L.layerGroup().addTo(mapaDashboard);
+    renderizarLeyendaIconos();
+    renderizarLeyendaWmsDashboard();
     mapaDashboardListo = true;
   }
 
@@ -1745,12 +1750,8 @@ function llenarFiltrosMapaDashboard() {
       var item = puntos[p];
       var color = colorPorEstado(item.estadoDashboard);
 
-      var marcador = L.circleMarker([item.latitud, item.longitud], {
-        radius: 7,
-        color: "#ffffff",
-        weight: 2,
-        fillColor: color,
-        fillOpacity: 0.9
+      var marcador = L.marker([item.latitud, item.longitud], {
+        icon: crearIconoTramite(item)
       });
 
       marcador.bindPopup(popupMapa(item));
