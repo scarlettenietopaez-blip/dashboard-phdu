@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard PHDU V25</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="contenedor">
+    <header class="header-integrado">
+      <div class="header-top">
+        <div class="marca">
+        <div class="logo">GADMR</div>
+        <div>
+          <h1>Dashboard Planificación, Hábitat y Desarrollo Urbanístico</h1>
+          <p class="subtitulo subtitulo-vacio"></p>
+        </div>
+      </div>
+        <div class="acciones">
+        <span class="etiqueta" id="fechaActual">—</span>
+        <span class="etiqueta" id="estadoDatos">Cargando datos...</span>
+        <button id="btnActualizar">Actualizar</button>
+      </div>
+      </div>
+
+      <nav class="pestanas pestanas-integradas">
+      <button class="pestana activa" data-tab="tab-dashboard">1. Dashboard</button>
+      <button class="pestana" data-tab="tab-tramitologia">2. Tramitología</button>
+      <button class="pestana" data-tab="tab-eficiencia">3. Eficiencia técnica</button>
+      <button class="pestana" data-tab="tab-reportes">4. Reportes</button>
+    </nav>
+    </header>
+
+    <div class="aviso" id="aviso"></div>
+    <section id="tab-dashboard" class="seccion activa">
+      <section class="dashboard-top-grid dashboard-top-grid-v2">
+        <article class="panel panel-destacado estado-card estado-card-v2">
+          <div class="panel-encabezado">
+            <div>
+              <h2>Estado general de trámites</h2>
+              
+            </div>
+          </div>
+          <div id="graficoDashboardEstado" class="grafico-donut-wrap grafico-donut-wrap-v2"></div>
+        </article>
+
+        <article class="panel panel-destacado promedio-card">
+          <div class="panel-encabezado">
+            <div>
+              <h2>Tiempo promedio de respuesta según Tipo de Trámite</h2>
+              <p class="nota-tiempo-dashboard">Medido en <strong>días calendario</strong>, desde <strong>fech_tramite</strong> hasta <strong>fech_fin_tramite</strong>; si el trámite está activo, se calcula hasta la fecha actual.</p>
+              
+            </div>
+          </div>
+          <div id="graficoDashboardPromediosTramite" class="grafico-barras grafico-grande grafico-multicolor"></div>
+        </article>
+      </section>
+
+      <section class="panel panel-destacado dashboard-integrado dashboard-integrado-v2">
+        <div class="panel-encabezado">
+          <div>
+            <h2>Mapa y Consulta individual</h2>
+            
+          </div>
+        </div>
+
+        <div class="dashboard-map-stage">
+          <div id="mapaDashboard"></div>
+
+          <div class="map-overlay map-overlay-top-left">
+            <div class="overlay-card overlay-buscador">
+              <h3>Búsqueda y filtros</h3>
+              <div class="filtros-dashboard-integrado filtros-dashboard-overlay">
+                <input id="dashboardConsultaBusqueda" type="search" placeholder="Buscar por eGOB, solicitante, trámite o técnico...">
+                <select id="dashboardMapaFiltroTramite">
+                  <option value="">Todos los tipos</option>
+                </select>
+                <select id="dashboardMapaFiltroEstado">
+                  <option value="">Todos los estados</option>
+                  <option value="Activo">Activo</option>
+                  <option value="Despachado">Despachado</option>
+                </select>
+                <select id="dashboardMapaFiltroTecnico">
+                  <option value="">Todos los técnicos</option>
+                </select>
+                <button id="btnDashboardConsultar" type="button">Consultar</button>
+              </div>
+              <div class="mapa-resumen compacta mapa-resumen-overlay">
+                <span id="dashboardMapaTotalPuntos">0 puntos mapeados</span>
+                <span id="dashboardMapaSinCoordenadas">0 sin coordenadas válidas</span>
+                <span id="dashboardMapaEvaluados">0 trámites evaluados</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="dashboardConsultaPanel" class="map-overlay map-overlay-right consulta-oculta">
+            <div class="overlay-card overlay-consulta">
+              <h3>Consulta individual</h3>
+              
+
+              <div class="detalle-box detalle-scroll detalle-scroll-mapa" id="detalleTramiteDashboard">
+                <h3>Selecciona un trámite</h3>
+                <p class="ayuda">Usa el buscador para cargar el detalle del trámite en esta vista.</p>
+              </div>
+
+              <div class="dashboard-consulta-grid dashboard-consulta-grid-v2">
+                <div>
+                  <h4>Tabla Tiempos por responsable</h4>
+                  <div id="tablaTiempoResponsableDashboard" class="tiempos-cards-dashboard"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style="display:none">
+        <input id="dashboardBusqueda" type="search" value="">
+        <button id="btnDashboardBuscar" type="button">Buscar</button>
+        <div id="tablaDashboardBusqueda"></div>
+      </div>
+    </section>
+
+<section id="tab-tramitologia" class="seccion">
+      <section class="grid">
+        <article class="panel">
+          <div class="panel-titulo-total"><h2>Trámites activos por tipo</h2><span class="panel-total-chip" id="totalActivosPorTipo">0 trámites</span></div>
+          <p>Se agrupa por la columna nam_tramite.</p>
+          <div id="graficoTramite" class="grafico-barras"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-titulo-total"><h2>Trámites activos por técnico actual</h2><span class="panel-total-chip" id="totalActivosPorTecnico">0 asignaciones</span></div>
+          <p>Solo muestra técnicos. “Pendiente de cierre” no se incluye porque ya no está en manos de un técnico.</p>
+          <div id="graficoTecnico" class="grafico-barras"></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>Tabla general de tramitología</h2>
+        <p>La tabla tiene scroll vertical y horizontal para revisar todos los datos sin extender el dashboard.</p>
+        <div class="filtros">
+          <input id="buscar" type="search" placeholder="Buscar por eGOB, solicitante, trámite o técnico...">
+          <select id="filtroEstado">
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activo</option>
+            <option value="Despachado">Despachado</option>
+          </select>
+          <select id="filtroTramite">
+            <option value="">Todos los trámites</option>
+          </select>
+        </div>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>eGOB</th>
+                <th>Soy Riobamba</th>
+                <th>Solicitante</th>
+                <th>Trámite</th>
+                <th>Responsable(s) actual(es)</th>
+                <th>Etapa(s) activa(s)</th>
+                <th>Estado dashboard</th>
+                <th>fech_tramite</th>
+                <th>fech_habitat</th>
+                <th>fech_fin_tramite</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTramites"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-consulta" class="seccion">
+      <section class="panel">
+        <h2>Consulta individual de trámite</h2>
+        <p>Busca por eGOB, Soy Riobamba, solicitante o nombre del trámite.</p>
+        <div class="buscador-linea">
+          <input id="buscarIndividual" type="search" placeholder="Ejemplo: 1046655, IPRUS, nombre del solicitante...">
+          <button id="btnBuscarIndividual">Buscar</button>
+        </div>
+
+        <div class="grid">
+          <div>
+            <div class="detalle-box" id="detalleTramite">
+              <h3>Selecciona un trámite</h3>
+              <p class="ayuda">Aquí se mostrarán los datos principales, estado, responsable actual, comentarios y tiempos.</p>
+            </div>
+            <br>
+            <h2>Historial original</h2>
+            <p class="ayuda">Texto tal como está en la columna historial.</p>
+            <pre id="historialOriginal">—</pre>
+          </div>
+          <div>
+            <h2>Tabla de tiempos por responsable</h2>
+            <p class="ayuda">Cada movimiento aparece en una fila independiente.</p>
+            <div class="tabla-contenedor tabla-mini">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Responsable</th>
+                    <th>Área(s)</th>
+                    <th>Movimientos ocurridos</th>
+                    <th>Total días laborables</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaTiempoResponsable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-eficiencia" class="seccion">
+      <section class="grid">
+        <article class="panel">
+          <h2>Top 10 trámites más antiguos</h2>
+          <p>Activos ordenados por fech_tramite. Incluye técnico responsable actual.</p>
+          <div class="lista-scroll" id="topAntiguos"></div>
+        </article>
+        <article class="panel">
+          <h2>Top 10 trámites más demorados en Hábitat</h2>
+          <p>Activos ordenados por días desde fech_habitat. Incluye técnico responsable actual.</p>
+          <div class="lista-scroll" id="topHabitat"></div>
+        </article>
+      </section>
+
+      <section class="grid-3">
+        <article class="panel">
+          <h2>Técnicos con atención más rápida</h2>
+          <p>Menor promedio de días laborables por movimiento. Ordenado de más rápido a más lento.</p>
+          <div class="grafico-barras" id="rankingPromedioTecnico"></div>
+        </article>
+        <article class="panel">
+          <h2>Técnicos con más despachados</h2>
+          <p>Trámites despachados donde intervino el técnico.</p>
+          <div class="grafico-barras" id="rankingDespachadosTecnico"></div>
+        </article>
+        <article class="panel">
+          <h2>Técnicos con más activos</h2>
+          <p>Trámites activos actualmente en manos del técnico.</p>
+          <div class="grafico-barras" id="rankingActivosTecnico"></div>
+        </article>
+      </section>
+
+      <section class="grid grid-unica">
+        <article class="panel">
+          <h2>Promedio de días por área</h2>
+          <p>Promedio laborable según movimientos del historial. Puedes filtrar por nam_tramite o dejar General.</p>
+          <select id="filtroPromedioAreaTramite" class="selector-panel">
+            <option value="">General: todos los trámites</option>
+          </select>
+          <div class="grafico-barras" id="promedioArea"></div>
+        </article>
+      </section>
+    </section>
+
+    <section id="tab-reportes" class="seccion">
+      <section class="panel">
+        <h2>Reporte individual por técnico</h2>
+        <p>Selecciona un técnico para ver pendientes, despachados, tiempos y trámites.</p>
+        <div class="reporte-linea">
+          <select id="selectorTecnico">
+            <option value="">Selecciona un técnico</option>
+          </select>
+          <div class="botones-linea">
+            <button id="btnGenerarReporte">Generar reporte</button>
+          </div>
+        </div>
+
+        <section class="tarjetas-5">
+          <article class="tarjeta">
+            <div class="label">Pendientes</div>
+            <div class="ayuda">Activos en manos del técnico.</div>
+            <div class="valor-sm naranja" id="repPendientes">0</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Despachados</div>
+            <div class="ayuda">Trámites donde intervino.</div>
+            <div class="valor-sm verde" id="repDespachados">0</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Promedio laborable</div>
+            <div class="ayuda">Promedio de movimientos.</div>
+            <div class="valor-sm azul" id="repPromedio">0 días</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Mayor demora técnica</div>
+            <div class="ayuda">Máximo movimiento en días laborables.</div>
+            <div class="valor-sm rojo" id="repMax">0 días</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Menor demora técnica</div>
+            <div class="ayuda">Mínimo movimiento en días laborables.</div>
+            <div class="valor-sm morado" id="repMin">0 días</div>
+          </article>
+        </section>
+
+        <section class="tarjetas">
+          <article class="tarjeta">
+            <div class="label">Informes aprobatorios</div>
+            <div class="ayuda">Movimientos Apr.</div>
+            <div class="valor verde" id="repAprobatorios">0</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Trámite más demorado en Hábitat</div>
+            <div class="ayuda">Donde intervino el técnico.</div>
+            <div class="valor-sm rojo" id="repHabitatMax">0 días</div>
+          </article>
+          <article class="tarjeta">
+            <div class="label">Total intervenciones</div>
+            <div class="ayuda">Trámites donde aparece el técnico.</div>
+            <div class="valor azul" id="repIntervenciones">0</div>
+          </article>
+        </section>
+
+        <h2>Top 10 trámites más demorados por el técnico en Hábitat</h2>
+        <p class="ayuda">Ordenado por días calendario desde fech_habitat.</p>
+        <div class="lista-scroll" id="repTopHabitatTecnico"></div>
+        <br>
+
+        <h2>Trámites donde intervino</h2>
+        <p class="ayuda">Incluye activos y despachados donde el técnico aparece como responsable o en historial.</p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>eGOB</th>
+                <th>Solicitante</th>
+                <th>Trámite</th>
+                <th>Estado</th>
+                <th>Días proceso</th>
+                <th>Días Hábitat</th>
+                <th>Responsable actual</th>
+              </tr>
+            </thead>
+            <tbody id="tablaReporteTecnico"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-mapa" class="seccion">
+      <section class="panel">
+        <h2>Mapa de trámites</h2>
+        <p>Visualización espacial de trámites con coordenadas X/Y. Se asume WGS84 / UTM zona 17S (EPSG:32717).</p>
+
+        <div class="filtros-mapa">
+          <input id="mapaBusqueda" type="search" placeholder="Buscar por eGOB, solicitante, trámite o técnico...">
+          <select id="mapaFiltroTramite">
+            <option value="">Todos los tipos</option>
+          </select>
+          <select id="mapaFiltroEstado">
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activo</option>
+            <option value="Despachado">Despachado</option>
+          </select>
+          <select id="mapaFiltroTecnico">
+            <option value="">Todos los técnicos</option>
+          </select>
+          <button id="btnActualizarMapa" type="button">Actualizar mapa</button>
+        </div>
+
+        <div class="mapa-resumen">
+          <span id="mapaTotalPuntos">0 puntos mapeados</span>
+          <span id="mapaSinCoordenadas">0 trámites sin coordenadas válidas</span>
+          <span id="mapaEvaluados">0 trámites evaluados</span>
+          <span id="mapaDebugCoord">Coordenadas_X/Y: sin revisar</span>
+        </div>
+
+        <div id="mapaTramites"></div>
+
+        <br>
+        <h2>Tabla de puntos mapeados</h2>
+        <p class="ayuda">Sirve para verificar qué trámites se están ubicando en el mapa.</p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>eGOB</th>
+                <th>Solicitante</th>
+                <th>Trámite</th>
+                <th>Estado</th>
+                <th>Técnico actual</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+              </tr>
+            </thead>
+            <tbody id="tablaMapa"></tbody>
+          </table>
+        </div>
+
+        <br>
+        <h2>Trámites con coordenadas no leídas</h2>
+        <p class="ayuda">Registros que no se pudieron mapear por coordenadas vacías, incompletas o con formato no numérico.</p>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>eGOB</th>
+                <th>Solicitante</th>
+                <th>Trámite</th>
+                <th>Estado</th>
+                <th>Técnico actual</th>
+                <th>Coordenadas_X</th>
+                <th>Coordenadas_Y</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="tablaMapaInvalidos"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
