@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard PHDU V25</title>
+  <title>Dashboard PHDU V26</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -91,6 +91,19 @@
                 <span id="dashboardMapaTotalPuntos">0 puntos mapeados</span>
                 <span id="dashboardMapaSinCoordenadas">0 sin coordenadas válidas</span>
                 <span id="dashboardMapaEvaluados">0 trámites evaluados</span>
+              </div>
+              <div class="wms-panel-dashboard">
+                <div class="wms-panel-titulo">Capas territoriales WMS</div>
+                <button id="btnCargarWmsDashboard" type="button" class="btn-secundario-mini">Cargar capas</button>
+                <select id="selectWmsDashboard">
+                  <option value="">Selecciona una capa territorial</option>
+                </select>
+                <input id="inputWmsManualDashboard" type="text" placeholder="O escribe el nombre exacto de la capa WMS...">
+                <div class="wms-botones">
+                  <button id="btnAgregarWmsDashboard" type="button" class="btn-secundario-mini">Agregar</button>
+                  <button id="btnLimpiarWmsDashboard" type="button" class="btn-secundario-mini claro">Quitar capas</button>
+                </div>
+                <div id="estadoWmsDashboard" class="wms-estado"></div>
               </div>
             </div>
           </div>

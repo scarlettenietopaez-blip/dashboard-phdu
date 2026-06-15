@@ -1635,3 +1635,35 @@ h1 {
   min-width: 52px;
   text-align: right;
 }
+
+
+/* V26: iconos por tipo de trámite y capas WMS */
+.tramite-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+  background: rgba(255,255,255,.96);
+  border: 3px solid var(--marker-color, #1769b4);
+  box-shadow: 0 8px 18px rgba(15,23,42,.24);
+  transform: translate(-15px, -15px);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.tramite-marker:hover { transform: translate(-15px, -15px) scale(1.12); box-shadow: 0 10px 24px rgba(15,23,42,.30); }
+.tramite-marker.activo { --marker-color: var(--cyan-vivo, #06b6d4); }
+.tramite-marker.despachado { --marker-color: var(--magenta-vivo, #d946ef); }
+.tramite-marker.sin-estado { --marker-color: #8b5cf6; }
+.wms-panel-dashboard { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e6edf5; display: grid; gap: 7px; }
+.wms-panel-titulo { font-size: 11px; color: #475569; font-weight: 900; text-transform: uppercase; letter-spacing: .25px; }
+.wms-panel-dashboard select, .wms-panel-dashboard input { height: 32px; border-radius: 9px; border: 1px solid var(--borde); padding: 0 9px; font-size: 11.5px; background: white; }
+.wms-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.btn-secundario-mini { height: 31px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; border-radius: 9px; font-size: 11px; font-weight: 900; cursor: pointer; }
+.btn-secundario-mini:hover { background: #dbeafe; }
+.btn-secundario-mini.claro { border-color: #e2e8f0; color: #475569; background: #f8fafc; }
+.wms-estado { min-height: 14px; font-size: 10.5px; color: #64748b; line-height: 1.25; }
+.wms-estado.error { color: #b91c1c; }
+.wms-estado.ok { color: #047857; }
+.mapa-popup .icono-tramite-popup { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; font-weight: 800; color: #0f172a; }

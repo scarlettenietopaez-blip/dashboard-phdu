@@ -6,6 +6,8 @@
     DATA_URL: "datos.csv",
     FORMATO_FECHA: "es-EC"
   };
+  var WMS_DIVISION_TERRITORIAL_URL = "https://egobgeovisor.gadmriobamba.gob.ec:8080/geoserver/division_territorial/wms";
+
 
   var FERIADOS = [
     // Agrega feriados con formato dd/mm/aaaa
@@ -23,6 +25,8 @@
   var mapaDashboard = null;
   var capaMarcadoresDashboard = null;
   var mapaDashboardListo = false;
+  var controlCapasWmsDashboard = null;
+  var capasWmsDashboard = {};
 
   function elemento(id) {
     return document.getElementById(id);
@@ -74,6 +78,9 @@
     on("dashboardMapaFiltroTramite", "change", function () { renderizarMapaDashboard(); buscarTramiteDashboard(true); });
     on("dashboardMapaFiltroEstado", "change", function () { renderizarMapaDashboard(); buscarTramiteDashboard(true); });
     on("dashboardMapaFiltroTecnico", "change", function () { renderizarMapaDashboard(); buscarTramiteDashboard(true); });
+    on("btnCargarWmsDashboard", "click", cargarCapasWmsDashboard);
+    on("btnAgregarWmsDashboard", "click", agregarCapaWmsDashboard);
+    on("btnLimpiarWmsDashboard", "click", limpiarCapasWmsDashboard);
 
     setTimeout(function () {
       iniciarMapaDashboard();
@@ -1302,6 +1309,129 @@ function actualizarDashboardBusqueda() {
   }
 
 
+
+
+  function normalizarTipo(texto) {
+    return normalizarTexto(texto || "").replace(/\./g, "").replace(/\s+/g, " ").trim();
+  }
+  function iconoPorTipoTramite(tipo) {
+    var t = normalizarTipo(tipo);
+    if (t.indexOf("PROPIEDAD HORIZONTAL") !== -1) return "🏢";
+    if (t.indexOf("URBANIZACION") !== -1) return "🏘️";
+    if (t.indexOf("SUBDIVISION") !== -1) return "🧩";
+    if (t.indexOf("DESMEMBRACION") !== -1) return "✂️";
+    if (t.indexOf("PUBLICIDAD") !== -1) return "🪧";
+    if (t.indexOf("IPRUS") !== -1) return "📋";
+    if (t.indexOf("ICUS") !== -1) return "🏛️";
+    if (t.indexOf("O MAYOR") !== -1 || t.indexOf("OBRA MAYOR") !== -1) return "🏗️";
+    if (t.indexOf("ANTEP") !== -1 || t.indexOf("ANTEPROYECTO") !== -1) return "📝";
+    if (t.indexOf("FRACCIONAMIENTO AGRICOLA") !== -1 || t.indexOf("AGRICOLA") !== -1) return "🌾";
+    if (t.indexOf("RECONOCIMIENTO") !== -1 || t.indexOf("EDIFICACION") !== -1) return "🏠";
+    if (t.indexOf("PRORROGA") !== -1) return "⏳";
+    if (t.indexOf("MORFOLOGICO") !== -1) return "📐";
+    if (t.indexOf("PETICIONES") !== -1 || t.indexOf("VARIAS") !== -1) return "✉️";
+    if (t.indexOf("REESTRUCTURACION") !== -1 || t.indexOf("PARCEL") !== -1) return "🗂️";
+    return "📍";
+  }
+  function claseEstadoMarcador(estado) {
+    if (estado === "Despachado") return "despachado";
+    if (estado === "Activo") return "activo";
+    return "sin-estado";
+  }
+  function crearIconoTramite(t) {
+    var emoji = iconoPorTipoTramite(t.tramite);
+    var clase = claseEstadoMarcador(t.estadoDashboard);
+    var titulo = escaparAtributo((t.tramite || "Trámite") + " · " + t.estadoDashboard);
+    return L.divIcon({
+      className: "",
+      html: "<div class='tramite-marker " + clase + "' title='" + titulo + "'><span class='tramite-emoji'>" + emoji + "</span></div>",
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -14]
+    });
+  }
+  function cargarCapasWmsDashboard() {
+    var estado = elemento("estadoWmsDashboard");
+    var select = elemento("selectWmsDashboard");
+    if (!estado || !select) return;
+    estado.className = "wms-estado";
+    estado.textContent = "Cargando capas desde GeoServer...";
+    var url = WMS_DIVISION_TERRITORIAL_URL + "?service=WMS&version=1.1.1&request=GetCapabilities";
+    fetch(url)
+      .then(function (res) { if (!res.ok) throw new Error("HTTP " + res.status); return res.text(); })
+      .then(function (xmlTexto) {
+        var xml = new DOMParser().parseFromString(xmlTexto, "text/xml");
+        var names = Array.prototype.slice.call(xml.getElementsByTagName("Name"));
+        var capas = [];
+        var usados = {};
+        for (var i = 0; i < names.length; i++) {
+          var nombre = (names[i].textContent || "").trim();
+          if (!nombre || usados[nombre]) continue;
+          var parent = names[i].parentNode;
+          if (!parent || parent.nodeName.toLowerCase().indexOf("layer") === -1) continue;
+          var titulo = nombre;
+          var hijos = parent.childNodes;
+          for (var h = 0; h < hijos.length; h++) {
+            if (hijos[h].nodeName && hijos[h].nodeName.toLowerCase() === "title") {
+              titulo = (hijos[h].textContent || nombre).trim();
+              break;
+            }
+          }
+          usados[nombre] = true;
+          capas.push({ nombre: nombre, titulo: titulo });
+        }
+        capas.sort(function (a, b) { return a.titulo.localeCompare(b.titulo); });
+        select.innerHTML = "<option value=''>Selecciona una capa territorial</option>" + capas.map(function (c) {
+          return "<option value='" + escaparAtributo(c.nombre) + "'>" + escaparHtml(c.titulo + " (" + c.nombre + ")") + "</option>";
+        }).join("");
+        estado.className = "wms-estado ok";
+        estado.textContent = capas.length + " capas encontradas. Selecciona una y presiona Agregar.";
+      })
+      .catch(function (err) {
+        console.warn("No se pudo leer GetCapabilities WMS:", err);
+        estado.className = "wms-estado error";
+        estado.textContent = "No se pudo cargar la lista. Puedes escribir el nombre exacto de la capa WMS.";
+      });
+  }
+  function agregarCapaWmsDashboard() {
+    if (!mapaDashboardListo) iniciarMapaDashboard();
+    if (!mapaDashboardListo) return;
+    var select = elemento("selectWmsDashboard");
+    var input = elemento("inputWmsManualDashboard");
+    var estado = elemento("estadoWmsDashboard");
+    var nombre = (select && select.value ? select.value : "").trim();
+    if (!nombre && input) nombre = (input.value || "").trim();
+    if (!nombre) {
+      if (estado) { estado.className = "wms-estado error"; estado.textContent = "Selecciona o escribe una capa WMS."; }
+      return;
+    }
+    if (capasWmsDashboard[nombre]) {
+      if (estado) { estado.className = "wms-estado ok"; estado.textContent = "La capa ya está agregada."; }
+      return;
+    }
+    var capa = L.tileLayer.wms(WMS_DIVISION_TERRITORIAL_URL, {
+      layers: nombre,
+      format: "image/png",
+      transparent: true,
+      version: "1.1.1",
+      opacity: 0.68,
+      attribution: "GADMR GeoServer"
+    });
+    capa.addTo(mapaDashboard);
+    capasWmsDashboard[nombre] = capa;
+    if (!controlCapasWmsDashboard) {
+      controlCapasWmsDashboard = L.control.layers(null, {}, { collapsed: true, position: "bottomleft" }).addTo(mapaDashboard);
+    }
+    controlCapasWmsDashboard.addOverlay(capa, nombre);
+    if (estado) { estado.className = "wms-estado ok"; estado.textContent = "Capa agregada: " + nombre; }
+  }
+  function limpiarCapasWmsDashboard() {
+    if (!mapaDashboardListo) return;
+    Object.keys(capasWmsDashboard).forEach(function (nombre) { mapaDashboard.removeLayer(capasWmsDashboard[nombre]); });
+    capasWmsDashboard = {};
+    if (controlCapasWmsDashboard) { mapaDashboard.removeControl(controlCapasWmsDashboard); controlCapasWmsDashboard = null; }
+    if (elemento("estadoWmsDashboard")) { elemento("estadoWmsDashboard").className = "wms-estado"; elemento("estadoWmsDashboard").textContent = "Capas territoriales retiradas."; }
+  }
 
   function iniciarMapaDashboard() {
     if (mapaDashboardListo) return;
